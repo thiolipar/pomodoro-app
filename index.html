@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>⏱ 00:00 • Pomodoro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Pomodoro</h1>
+
+    <div class="main-container">
+      <div class="side-column notes-column-left">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Anotações</div>
+            <span class="badge">autosave</span>
+          </div>
+          <textarea id="notes" class="notes" placeholder="Conteúdo"></textarea>
+          <div class="save-status">Salvo ✓</div>
+        </div>
+      </div>
+
+      <div class="center-column">
+        <div class="chips">
+          <div class="chip" data-preset="10-5-10">🚼 10/5/10<span>(leve)</span></div>
+          <div class="chip" data-preset="20-5-15">⭐ 20/5/15<span>(clássico)</span></div>
+          <div class="chip" data-preset="40-8-20">💪 40/8/20<span>(profundo)</span></div>
+          <div class="chip" data-preset="60-10-25">🔥 60/10/25<span>(hard)</span></div>
+        </div>
+
+        <div class="timer-display" id="timerDisplay">20:00</div>
+
+        <div class="timer-label" id="timerLabel">🔴 FOCO • 20 min</div>
+        <div class="timer-label small-label">🍅 (<span id="ciclosSpan">0</span> ciclos)</div>
+
+        <div id="tarefaEmExecucao" class="task-running">
+          <div class="task-running-label">⚡ Tarefa em execução:</div>
+          <div id="tarefaEmExecucaoTitulo" class="task-running-title"></div>
+        </div>
+
+        <div class="controls">
+          <button id="btnPlay" class="btn-primary">▶ Play</button>
+          <button id="btnPause" class="btn-secondary">⏸ Pause</button>
+          <button id="btnReset" class="btn-secondary">⏮ Reset</button>
+        </div>
+
+        <div class="center actions-bottom">
+          <button id="btnConfig" class="btn-secondary">Configurações</button>
+          <button id="btnStats" class="btn-secondary">Estatísticas</button>
+        </div>
+      </div>
+
+      <div class="side-column tasks-column-right">
+        <div class="section">
+          <div class="tasks-header">
+            <h3>Tarefas</h3>
+            <div class="tasks-buttons">
+              <button id="btnNovaTarefaFixa" class="btn-secondary">+ fixa</button>
+              <button id="btnNovaTarefaAvulsa" class="btn-secondary">+ avulsa</button>
+              <button id="btnNovaTarefaTime" class="btn-secondary">+ time</button>
+            </div>
+          </div>
+
+          <div class="tasks-subtitle">
+            Fixas (recorrentes) • Avulsas (pontuais) • Time (tempo específico).
+          </div>
+
+          <div class="tasks-container">
+            <div class="tasks-column">
+              <div class="tasks-column-title pending-title">Pendentes</div>
+              <ul id="listaTarefasPendentes" class="tasks-list"></ul>
+            </div>
+
+            <div class="tasks-column">
+              <div class="tasks-column-title done-title">Concluídas</div>
+              <ul id="listaTarefasConcluidas" class="tasks-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-section">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Resumo</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">🍅 Pomodoros hoje:</div>
+            <div class="stat-value" id="pomodorosHoje">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">⏱ Minutos focados hoje:</div>
+            <div class="stat-value" id="minutosHoje">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">✅ Tarefas concluídas:</div>
+            <div class="stat-value" id="tarefasConcluidas">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">🔥 Streak:</div>
+            <div class="stat-value" id="streakDias">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAIS -->
+  <div class="modal-backdrop" id="backdropConfig">
+    <div class="modal">
+      <h3>Configurações</h3>
+
+      <label>Cor Foco</label>
+      <div class="color-palette" id="corFocoPalette"></div>
+
+      <label>Cor Descanso Curto</label>
+      <div class="color-palette" id="corDescansoCurtoPalette"></div>
+
+      <label>Cor Descanso Longo</label>
+      <div class="color-palette" id="corDescansoLongoPalette"></div>
+
+      <label>Cor Tarefa Fixa</label>
+      <div class="color-palette" id="corTarefaFixaPalette"></div>
+
+      <label>Cor Tarefa Avulsa</label>
+      <div class="color-palette" id="corTarefaAvulsaPalette"></div>
+
+      <label>Cor Tarefa Time</label>
+      <div class="color-palette" id="corTarefaTimePalette"></div>
+
+      <label>Som de Finalização</label>
+      <select id="somFinalizacao">
+        <option value="none">Nenhum</option>
+        <option value="beep">Beep</option>
+        <option value="bell">Sino</option>
+      </select>
+
+      <label>Notificações Desktop</label>
+      <select id="notificacoesToggle">
+        <option value="off">Desligado</option>
+        <option value="on">Ligado</option>
+      </select>
+
+      <div class="modal-actions">
+        <button id="btnFecharConfig" class="btn-primary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="backdropStats">
+    <div class="modal">
+      <h3>Estatísticas Gerais</h3>
+      <div class="stats-modal-content">
+        Total de Pomodoros: <strong id="totalPomodoros">0</strong><br />
+        Total de Minutos: <strong id="totalMinutos">0</strong><br />
+        Dias com Pomodoro: <strong id="diasComPomodoro">0</strong><br />
+        Melhor Streak: <strong id="streakMelhor">0</strong>
+      </div>
+      <div class="modal-actions">
+        <button id="btnFecharStats" class="btn-primary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="backdropTarefaFixa">
+    <div class="modal">
+      <h3>Nova Tarefa Fixa</h3>
+      <label>Título</label>
+      <input type="text" id="tarefaFixaTitulo" placeholder="Ex: Estudar Inglês" />
+      <label>Duração (dias)</label>
+      <input type="number" id="tarefaFixaDuracao" value="7" />
+      <div class="modal-actions">
+        <button id="cancelarTarefaFixa" class="btn-secondary">Cancelar</button>
+        <button id="criarTarefaFixa" class="btn-primary">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="backdropTarefaAvulsa">
+    <div class="modal">
+      <h3>Nova Tarefa Avulsa</h3>
+      <label>Título</label>
+      <input type="text" id="tarefaAvulsaTitulo" placeholder="Ex: Comprar pão" />
+      <div class="modal-actions">
+        <button id="cancelarTarefaAvulsa" class="btn-secondary">Cancelar</button>
+        <button id="criarTarefaAvulsa" class="btn-primary">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="backdropTarefaTime">
+    <div class="modal">
+      <h3>Nova Tarefa Time</h3>
+      <label>Título</label>
+      <input type="text" id="tarefaTimeTitulo" placeholder="Ex: Reunião" />
+      <label>Minutos</label>
+      <input type="number" id="tarefaTimeMinutos" value="30" />
+      <div class="modal-actions">
+        <button id="cancelarTarefaTime" class="btn-secondary">Cancelar</button>
+        <button id="criarTarefaTime" class="btn-primary">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
