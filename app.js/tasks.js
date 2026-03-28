@@ -1,6 +1,5 @@
 import { STORAGE_KEYS, loadJSON, saveJSON, saveText, loadText } from "./storage.js";
 
-
 export function createTasksModule({
   config,
   timer,
@@ -15,10 +14,9 @@ export function createTasksModule({
     new Date().toISOString().split("T")[0]
   );
 
-  const stats = {
-    tarefasConcluidas: 0
-  };
-
+  // =====================
+  // STORAGE
+  // =====================
   function salvarTarefas() {
     saveJSON(STORAGE_KEYS.TAREFAS, tarefas);
   }
@@ -30,13 +28,16 @@ export function createTasksModule({
   }
 
   function salvarNotas() {
-    saveLocalText(STORAGE_KEYS.NOTES, notesArea.value);
+    saveText(STORAGE_KEYS.NOTES, notesArea.value);
   }
 
   function carregarNotas() {
     notesArea.value = loadText(STORAGE_KEYS.NOTES, "");
   }
 
+  // =====================
+  // RESET TAREFAS FIXAS
+  // =====================
   function verificarResetTarefasFixas() {
     const hoje = new Date().toISOString().split("T")[0];
 
@@ -52,6 +53,7 @@ export function createTasksModule({
 
           const dataCriacao = new Date(tarefa.dataCriacao);
           const hojeDate = new Date();
+
           const diasPassados = Math.floor(
             (hojeDate - dataCriacao) / (1000 * 60 * 60 * 24)
           );
@@ -68,9 +70,12 @@ export function createTasksModule({
     }
   }
 
+  // =====================
+  // RENDER
+  // =====================
   function atualizarContadorConclusoes() {
-    stats.tarefasConcluidas = tarefas.filter((t) => t.concluida).length;
-    tarefasConcluidasEl.textContent = stats.tarefasConcluidas;
+    const total = tarefas.filter((t) => t.concluida).length;
+    tarefasConcluidasEl.textContent = total;
   }
 
   function renderizarTarefas() {
@@ -92,6 +97,9 @@ export function createTasksModule({
       const span = document.createElement("span");
       span.textContent = tarefa.titulo;
 
+      // =====================
+      // BADGE
+      // =====================
       let cor = config.corTarefaAvulsa;
       let tipoLabel = "avulsa";
 
@@ -115,8 +123,11 @@ export function createTasksModule({
         badge.textContent = tipoLabel;
       }
 
+      // =====================
+      // BOTÕES
+      // =====================
       const btnConcluir = document.createElement("button");
-      btnConcluir.textContent = tarefa.concluida ? "↩ Reavivar" : "Concluir";
+      btnConcluir.textContent = tarefa.concluida ? "↩ Reabrir" : "Concluir";
       btnConcluir.className = "btn-secondary";
 
       const btnExcluir = document.createElement("button");
@@ -127,13 +138,19 @@ export function createTasksModule({
       li.appendChild(span);
       li.appendChild(badge);
 
+      // =====================
+      // TAREFA TIME → PLAY
+      // =====================
       if (tarefa.tipo === "time") {
         const btnPlay = document.createElement("button");
         btnPlay.textContent = "▶ Play";
         btnPlay.className = "btn-primary";
 
         btnPlay.addEventListener("click", () => {
-          timer.definirTimerCustom(Number(tarefa.minutosTime) * 60, tarefa);
+          timer.definirTimerCustom(
+            Number(tarefa.minutosTime) * 60,
+            tarefa
+          );
 
           if (tarefa.concluida) {
             tarefa.concluida = false;
@@ -149,6 +166,9 @@ export function createTasksModule({
       li.appendChild(btnConcluir);
       li.appendChild(btnExcluir);
 
+      // =====================
+      // EVENTOS
+      // =====================
       chk.addEventListener("change", () => {
         tarefa.concluida = chk.checked;
         salvarTarefas();
@@ -173,6 +193,9 @@ export function createTasksModule({
     atualizarContadorConclusoes();
   }
 
+  // =====================
+  // CRIAÇÃO DE TAREFAS
+  // =====================
   function criarTarefaFixa(titulo, dias) {
     tarefas.push({
       id: Date.now(),
@@ -209,11 +232,17 @@ export function createTasksModule({
     };
 
     tarefas.push(tarefa);
+
     salvarTarefas();
     renderizarTarefas();
+
+    // inicia timer automaticamente
     timer.definirTimerCustom(tarefa.minutosTime * 60, tarefa);
   }
 
+  // =====================
+  // EXPORT
+  // =====================
   return {
     carregarTarefas,
     renderizarTarefas,
@@ -222,7 +251,6 @@ export function createTasksModule({
     criarTarefaTime,
     salvarNotas,
     carregarNotas,
-    verificarResetTarefasFixas,
-    getStats: () => stats
+    verificarResetTarefasFixas
   };
 }
