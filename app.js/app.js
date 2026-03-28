@@ -2,6 +2,9 @@ import { loadConfig, saveConfig, applyConfigUI, requestNotificationPermissionIfN
 import { createTimer } from "./timer.js";
 import { createTasksModule } from "./tasks.js";
 
+// =====================
+// ELEMENTOS DOM
+// =====================
 const elements = {
   timerDisplay: document.getElementById("timerDisplay"),
   timerLabel: document.getElementById("timerLabel"),
@@ -19,11 +22,6 @@ const elements = {
   pomodorosHojeEl: document.getElementById("pomodorosHoje"),
   minutosHojeEl: document.getElementById("minutosHoje"),
   tarefasConcluidasEl: document.getElementById("tarefasConcluidas"),
-  streakDiasEl: document.getElementById("streakDias"),
-  streakMelhorEl: document.getElementById("streakMelhor"),
-  totalPomodorosEl: document.getElementById("totalPomodoros"),
-  totalMinutosEl: document.getElementById("totalMinutos"),
-  diasComPomodoroEl: document.getElementById("diasComPomodoro"),
 
   backdropConfig: document.getElementById("backdropConfig"),
   btnConfig: document.getElementById("btnConfig"),
@@ -53,27 +51,29 @@ const elements = {
   criarTarefaTimeBtn: document.getElementById("criarTarefaTime"),
   cancelarTarefaTimeBtn: document.getElementById("cancelarTarefaTime"),
   tarefaTimeTituloInput: document.getElementById("tarefaTimeTitulo"),
-  tarefaTimeMinutosInput: document.getElementById("tarefaTimeMinutos"),
-
-  tarefaEmExecucaoDiv: document.getElementById("tarefaEmExecucao"),
-  tarefaEmExecucaoTitulo: document.getElementById("tarefaEmExecucaoTitulo")
+  tarefaTimeMinutosInput: document.getElementById("tarefaTimeMinutos")
 };
 
+// =====================
+// CONFIG
+// =====================
 const config = loadConfig();
 
+// =====================
+// TIMER
+// =====================
 const timer = createTimer({
   timerDisplay: elements.timerDisplay,
   timerLabel: elements.timerLabel,
   ciclosSpan: elements.ciclosSpan,
   pomodorosHojeEl: elements.pomodorosHojeEl,
   minutosHojeEl: elements.minutosHojeEl,
-  totalPomodorosEl: elements.totalPomodorosEl,
-  totalMinutosEl: elements.totalMinutosEl,
-  tarefaEmExecucaoDiv: elements.tarefaEmExecucaoDiv,
-  tarefaEmExecucaoTitulo: elements.tarefaEmExecucaoTitulo,
   config
 });
 
+// =====================
+// TASKS
+// =====================
 const tasks = createTasksModule({
   config,
   timer,
@@ -83,15 +83,22 @@ const tasks = createTasksModule({
   notesArea: elements.notesArea
 });
 
-function abrirModal(element) {
-  element.style.display = "flex";
+// =====================
+// MODAIS
+// =====================
+function abrirModal(el) {
+  el.style.display = "flex";
 }
 
-function fecharModal(element) {
-  element.style.display = "none";
+function fecharModal(el) {
+  el.style.display = "none";
 }
 
+// =====================
+// EVENTOS
+// =====================
 function registrarEventos() {
+  // TIMER
   elements.btnPlay.addEventListener("click", timer.iniciarTimer);
   elements.btnPause.addEventListener("click", timer.pausarTimer);
   elements.btnReset.addEventListener("click", timer.resetarTimer);
@@ -102,55 +109,9 @@ function registrarEventos() {
     });
   });
 
+  // CONFIG
   elements.btnConfig.addEventListener("click", () => abrirModal(elements.backdropConfig));
   elements.btnFecharConfig.addEventListener("click", () => fecharModal(elements.backdropConfig));
-
-  elements.btnStats.addEventListener("click", () => abrirModal(elements.backdropStats));
-  elements.btnFecharStats.addEventListener("click", () => fecharModal(elements.backdropStats));
-
-  elements.btnNovaTarefaFixa.addEventListener("click", () => abrirModal(elements.backdropTarefaFixa));
-  elements.cancelarTarefaFixaBtn.addEventListener("click", () => fecharModal(elements.backdropTarefaFixa));
-
-  elements.criarTarefaFixaBtn.addEventListener("click", () => {
-    const titulo = elements.tarefaFixaTituloInput.value.trim();
-    const dias = elements.tarefaFixaDuracaoInput.value;
-
-    if (!titulo) return;
-
-    tasks.criarTarefaFixa(titulo, dias);
-    fecharModal(elements.backdropTarefaFixa);
-    elements.tarefaFixaTituloInput.value = "";
-    elements.tarefaFixaDuracaoInput.value = "7";
-  });
-
-  elements.btnNovaTarefaAvulsa.addEventListener("click", () => abrirModal(elements.backdropTarefaAvulsa));
-  elements.cancelarTarefaAvulsaBtn.addEventListener("click", () => fecharModal(elements.backdropTarefaAvulsa));
-
-  elements.criarTarefaAvulsaBtn.addEventListener("click", () => {
-    const titulo = elements.tarefaAvulsaTituloInput.value.trim();
-    if (!titulo) return;
-
-    tasks.criarTarefaAvulsa(titulo);
-    fecharModal(elements.backdropTarefaAvulsa);
-    elements.tarefaAvulsaTituloInput.value = "";
-  });
-
-  elements.btnNovaTarefaTime.addEventListener("click", () => abrirModal(elements.backdropTarefaTime));
-  elements.cancelarTarefaTimeBtn.addEventListener("click", () => fecharModal(elements.backdropTarefaTime));
-
-  elements.criarTarefaTimeBtn.addEventListener("click", () => {
-    const titulo = elements.tarefaTimeTituloInput.value.trim();
-    const minutos = elements.tarefaTimeMinutosInput.value;
-
-    if (!titulo) return;
-
-    tasks.criarTarefaTime(titulo, minutos);
-    fecharModal(elements.backdropTarefaTime);
-    elements.tarefaTimeTituloInput.value = "";
-    elements.tarefaTimeMinutosInput.value = "30";
-  });
-
-  elements.notesArea.addEventListener("input", tasks.salvarNotas);
 
   elements.somFinalizacaoSelect.addEventListener("change", () => {
     config.somFinalizacao = elements.somFinalizacaoSelect.value;
@@ -162,8 +123,65 @@ function registrarEventos() {
     saveConfig(config);
     requestNotificationPermissionIfNeeded(config);
   });
+
+  // STATS
+  elements.btnStats.addEventListener("click", () => abrirModal(elements.backdropStats));
+  elements.btnFecharStats.addEventListener("click", () => fecharModal(elements.backdropStats));
+
+  // TAREFA FIXA
+  elements.btnNovaTarefaFixa.addEventListener("click", () => abrirModal(elements.backdropTarefaFixa));
+  elements.cancelarTarefaFixaBtn.addEventListener("click", () => fecharModal(elements.backdropTarefaFixa));
+
+  elements.criarTarefaFixaBtn.addEventListener("click", () => {
+    const titulo = elements.tarefaFixaTituloInput.value.trim();
+    const dias = elements.tarefaFixaDuracaoInput.value;
+
+    if (!titulo) return;
+
+    tasks.criarTarefaFixa(titulo, dias);
+    fecharModal(elements.backdropTarefaFixa);
+
+    elements.tarefaFixaTituloInput.value = "";
+  });
+
+  // TAREFA AVULSA
+  elements.btnNovaTarefaAvulsa.addEventListener("click", () => abrirModal(elements.backdropTarefaAvulsa));
+  elements.cancelarTarefaAvulsaBtn.addEventListener("click", () => fecharModal(elements.backdropTarefaAvulsa));
+
+  elements.criarTarefaAvulsaBtn.addEventListener("click", () => {
+    const titulo = elements.tarefaAvulsaTituloInput.value.trim();
+
+    if (!titulo) return;
+
+    tasks.criarTarefaAvulsa(titulo);
+    fecharModal(elements.backdropTarefaAvulsa);
+
+    elements.tarefaAvulsaTituloInput.value = "";
+  });
+
+  // TAREFA TIME
+  elements.btnNovaTarefaTime.addEventListener("click", () => abrirModal(elements.backdropTarefaTime));
+  elements.cancelarTarefaTimeBtn.addEventListener("click", () => fecharModal(elements.backdropTarefaTime));
+
+  elements.criarTarefaTimeBtn.addEventListener("click", () => {
+    const titulo = elements.tarefaTimeTituloInput.value.trim();
+    const minutos = elements.tarefaTimeMinutosInput.value;
+
+    if (!titulo) return;
+
+    tasks.criarTarefaTime(titulo, minutos);
+    fecharModal(elements.backdropTarefaTime);
+
+    elements.tarefaTimeTituloInput.value = "";
+  });
+
+  // NOTAS
+  elements.notesArea.addEventListener("input", tasks.salvarNotas);
 }
 
+// =====================
+// INIT
+// =====================
 function inicializar() {
   applyConfigUI(config, {
     onTaskRender: tasks.renderizarTarefas
@@ -173,16 +191,7 @@ function inicializar() {
   tasks.carregarTarefas();
   tasks.carregarNotas();
 
-  elements.streakDiasEl.textContent = "0";
-  elements.streakMelhorEl.textContent = "0";
-  elements.diasComPomodoroEl.textContent = "0";
-
   registrarEventos();
-
-  setInterval(() => {
-    tasks.verificarResetTarefasFixas();
-    tasks.renderizarTarefas();
-  }, 5 * 60 * 1000);
 }
 
 inicializar();

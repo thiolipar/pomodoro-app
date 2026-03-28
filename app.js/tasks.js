@@ -1,4 +1,5 @@
-import { STORAGE_KEYS, loadJSON, saveJSON, saveText, loadText, saveText as saveLocalText } from "./storage.js";
+import { STORAGE_KEYS, loadJSON, saveJSON, saveText, loadText } from "./storage.js";
+
 
 export function createTasksModule({
   config,

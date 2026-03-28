@@ -11,7 +11,10 @@ export function saveJSON(key, value) {
 
 export function loadJSON(key, fallback = null) {
   const raw = localStorage.getItem(key);
-  if (!raw) return fallback;
+
+  if (!raw) {
+    return fallback;
+  }
 
   try {
     return JSON.parse(raw);
@@ -26,5 +29,14 @@ export function saveText(key, value) {
 }
 
 export function loadText(key, fallback = "") {
-  return localStorage.getItem(key) ?? fallback;
+  const value = localStorage.getItem(key);
+  return value !== null ? value : fallback;
+}
+
+export function removeItem(key) {
+  localStorage.removeItem(key);
+}
+
+export function clearStorage() {
+  localStorage.clear();
 }

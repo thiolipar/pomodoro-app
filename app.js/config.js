@@ -6,6 +6,9 @@ export const PALETA_CORES = [
   "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f43f5e"
 ];
 
+// =====================
+// CONFIG PADRÃO
+// =====================
 export function createDefaultConfig() {
   return {
     corFoco: "#dc2626",
@@ -19,50 +22,61 @@ export function createDefaultConfig() {
   };
 }
 
+// =====================
+// LOAD / SAVE
+// =====================
 export function loadConfig() {
-  const config = createDefaultConfig();
+  const defaultConfig = createDefaultConfig();
   const stored = loadJSON(STORAGE_KEYS.CONFIG, {});
 
-  return { ...config, ...stored };
+  return { ...defaultConfig, ...stored };
 }
 
 export function saveConfig(config) {
   saveJSON(STORAGE_KEYS.CONFIG, config);
 }
 
+// =====================
+// UI CONFIG
+// =====================
 export function renderColorPalette(paletteId, activeColor, configKey, config, onChange) {
   const container = document.getElementById(paletteId);
+  if (!container) return;
+
   container.innerHTML = "";
 
   PALETA_CORES.forEach((color) => {
-    const colorBtn = document.createElement("button");
-    colorBtn.className = "color-option";
-    colorBtn.style.backgroundColor = color;
+    const btn = document.createElement("button");
+    btn.className = "color-option";
+    btn.style.backgroundColor = color;
 
     if (color === activeColor) {
-      colorBtn.classList.add("active");
+      btn.classList.add("active");
     }
 
-    colorBtn.addEventListener("click", () => {
+    btn.addEventListener("click", () => {
       config[configKey] = color;
       saveConfig(config);
-      onChange(color);
+      onChange();
     });
 
-    container.appendChild(colorBtn);
+    container.appendChild(btn);
   });
 }
 
 export function applyConfigUI(config, callbacks = {}) {
-  const {
-    onTaskRender = () => {}
-  } = callbacks;
+  const { onTaskRender = () => {} } = callbacks;
 
   const somFinalizacaoSelect = document.getElementById("somFinalizacao");
   const notificacoesToggle = document.getElementById("notificacoesToggle");
 
-  somFinalizacaoSelect.value = config.somFinalizacao || "beep";
-  notificacoesToggle.value = config.notificacoes;
+  if (somFinalizacaoSelect) {
+    somFinalizacaoSelect.value = config.somFinalizacao;
+  }
+
+  if (notificacoesToggle) {
+    notificacoesToggle.value = config.notificacoes;
+  }
 
   renderColorPalette("corFocoPalette", config.corFoco, "corFoco", config, () => {
     applyConfigUI(config, callbacks);
@@ -92,6 +106,9 @@ export function applyConfigUI(config, callbacks = {}) {
   });
 }
 
+// =====================
+// NOTIFICAÇÕES
+// =====================
 export function requestNotificationPermissionIfNeeded(config) {
   if (config.notificacoes === "on" && "Notification" in window) {
     if (Notification.permission === "default") {

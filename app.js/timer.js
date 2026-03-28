@@ -4,10 +4,6 @@ export function createTimer({
   ciclosSpan,
   pomodorosHojeEl,
   minutosHojeEl,
-  totalPomodorosEl,
-  totalMinutosEl,
-  tarefaEmExecucaoDiv,
-  tarefaEmExecucaoTitulo,
   config
 }) {
   let modo = "foco";
@@ -18,17 +14,11 @@ export function createTimer({
   let tarefaTimeAtual = null;
   let audioContext = null;
 
-  const stats = {
-    pomodorosHoje: 0,
-    minutosHoje: 0,
-    totalPomodoros: 0,
-    totalMinutos: 0
-  };
-
   function segundosParaMMSS(segundos) {
-    const m = Math.floor(segundos / 60);
-    const s = segundos % 60;
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    const minutos = Math.floor(segundos / 60);
+    const segundosRestantes = segundos % 60;
+
+    return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
   }
 
   function atualizarDisplayTempo(segundos) {
@@ -87,6 +77,7 @@ export function createTimer({
     if (config.notificacoes !== "on") return;
 
     const titulo = tarefaTimeAtual ? tarefaTimeAtual.titulo : "Tempo encerrado";
+
     const corpo =
       modo === "foco"
         ? `Ciclo de foco finalizado: ${titulo}`
@@ -94,17 +85,9 @@ export function createTimer({
         ? "Descanso curto finalizado"
         : "Descanso longo finalizado";
 
-    new Notification("Tarefa concluída", { body: corpo });
-  }
-
-  function limparTarefaEmExecucao() {
-    tarefaEmExecucaoDiv.style.display = "none";
-    tarefaEmExecucaoTitulo.textContent = "";
-  }
-
-  function atualizarTarefaEmExecucao(titulo, minutos) {
-    tarefaEmExecucaoTitulo.textContent = `${titulo} (${minutos}m)`;
-    tarefaEmExecucaoDiv.style.display = "block";
+    new Notification("Tarefa concluída", {
+      body: corpo
+    });
   }
 
   function onTimerFinish() {
@@ -113,15 +96,9 @@ export function createTimer({
 
     if (modo === "foco") {
       cicloAtual += 1;
-      stats.pomodorosHoje += 1;
-      stats.totalPomodoros += 1;
-      stats.minutosHoje += focoAtualMinutos;
-      stats.totalMinutos += focoAtualMinutos;
 
-      pomodorosHojeEl.textContent = stats.pomodorosHoje;
-      minutosHojeEl.textContent = stats.minutosHoje;
-      totalPomodorosEl.textContent = stats.totalPomodoros;
-      totalMinutosEl.textContent = stats.totalMinutos;
+      pomodorosHojeEl.textContent = Number(pomodorosHojeEl.textContent) + 1;
+      minutosHojeEl.textContent = Number(minutosHojeEl.textContent) + focoAtualMinutos;
 
       if (cicloAtual % 4 === 0) {
         modo = "break-longo";
@@ -134,7 +111,6 @@ export function createTimer({
       modo = "foco";
       tempoRestante = focoAtualMinutos * 60;
       tarefaTimeAtual = null;
-      limparTarefaEmExecucao();
     }
 
     atualizarDisplayTempo(tempoRestante);
@@ -156,13 +132,18 @@ export function createTimer({
   }
 
   function iniciarTimer() {
-    if (!audioContext) initAudioContext();
+    if (!audioContext) {
+      initAudioContext();
+    }
+
     if (intervalo) return;
+
     intervalo = setInterval(tick, 1000);
   }
 
   function pausarTimer() {
     if (!intervalo) return;
+
     clearInterval(intervalo);
     intervalo = null;
   }
@@ -172,23 +153,26 @@ export function createTimer({
     cicloAtual = 0;
     modo = "foco";
     tempoRestante = focoAtualMinutos * 60;
+    tarefaTimeAtual = null;
+
     atualizarDisplayTempo(tempoRestante);
     atualizarLabel();
-    limparTarefaEmExecucao();
-    tarefaTimeAtual = null;
   }
 
   function aplicarPreset(presetStr) {
     const [foco] = presetStr.split("-").map((v) => parseInt(v, 10));
+
     focoAtualMinutos = foco;
     tempoRestante = foco * 60;
     modo = "foco";
 
-    if (intervalo) clearInterval(intervalo);
-    intervalo = null;
+    if (intervalo) {
+      clearInterval(intervalo);
+      intervalo = null;
+    }
 
     atualizarDisplayTempo(tempoRestante);
-    timerLabel.textContent = `🔴 FOCO • ${foco} min`;
+    atualizarLabel();
   }
 
   function definirTimerCustom(segundos, tarefa = null) {
@@ -197,10 +181,6 @@ export function createTimer({
     tempoRestante = segundos;
     focoAtualMinutos = Math.round(segundos / 60);
     tarefaTimeAtual = tarefa;
-
-    if (tarefa) {
-      atualizarTarefaEmExecucao(tarefa.titulo, tarefa.minutosTime);
-    }
 
     atualizarDisplayTempo(tempoRestante);
     atualizarLabel();
@@ -217,8 +197,6 @@ export function createTimer({
     pausarTimer,
     resetarTimer,
     aplicarPreset,
-    definirTimerCustom,
-    limparTarefaEmExecucao,
-    getStats: () => stats
+    definirTimerCustom
   };
 }
